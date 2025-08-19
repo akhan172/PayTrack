@@ -3,6 +3,7 @@ package com.alpha.payroll.Service;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,12 +49,15 @@ public class AttendanceService {
         
         for (Employee employee : employees) {
             LocalDate currentDate = startDate;
+            //int cnt=0;
+            //List<Attendance> attenList = new ArrayList<>();
             
             while (!currentDate.isAfter(endDate)) {
                 if (!attendanceRepository.existsByEmployeeIdAndDate(employee.getId(), currentDate)) {
                     AttendanceStatus status = determineAttendanceStatus(currentDate);
                     
                     if (status != null) {
+                    	if(status == AttendanceStatus.PRESENT)cnt++;
                         Attendance attendance = Attendance.builder()
                                 .employee(employee)
                                 .date(currentDate)
@@ -116,6 +120,7 @@ public class AttendanceService {
         List<Attendance> attendanceRecords = attendanceRepository.findByEmployeeId(employeeId);
         
         return attendanceRecords.stream()
+        		.filter(record->record.getStatus()==AttendanceStatus.PRESENT)
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
     }
